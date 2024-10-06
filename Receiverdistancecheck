@@ -1,0 +1,55 @@
+const int trigPin2 = 7;
+const int echoPin2 = 8;
+const int vibOutPin2 = 2;
+
+long duration, cm;
+bool vibrationActive = false;
+
+void setup() {
+  Serial.begin(9600); // 初始化串口通信
+  pinMode(trigPin2, OUTPUT);
+  pinMode(echoPin2, INPUT);
+  pinMode(vibOutPin2, OUTPUT);
+}
+
+void loop() {
+  // 读取自己的超声波传感器距离
+  long distance2 = readDistance(trigPin2, echoPin2);
+  
+  // 发送距离到另一块Arduino
+  Serial.print(distance2);
+  Serial.println();
+
+  // 接收另一块Arduino传来的距离
+  if (Serial.available() > 0) {
+    String receivedData = Serial.readStringUntil('\n');
+    long distance1 = receivedData.toInt();
+
+    // 判断两块板子的距离是否都小于5厘米
+    if (distance1 <= 5 && distance2 <= 5) {
+      digitalWrite(vibOutPin2, HIGH); // 震动马达启动
+      vibrationActive = true;
+    } else {
+      digitalWrite(vibOutPin2, LOW); // 震动马达关闭
+      vibrationActive = false;
+    }
+  }
+
+  delay(100); // 等待下一个循环
+}
+
+long readDistance(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  
+  long duration = pulseIn(echoPin, HIGH);
+  return microsecondsToCentimeters(duration);
+}
+
+long microsecondsToCentimeters(long microseconds) {
+  return microseconds / 29 / 2;
+}
+
