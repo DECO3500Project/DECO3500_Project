@@ -1,0 +1,135 @@
+#include "Wire.h"       
+#include "I2Cdev.h"     
+#include "MPU6050.h"    
+
+// Ultrasonic Sensor Pins
+const int trigPin1 = 7;  // Arduino 1 超声波传感器的触发引脚
+const int echoPin1 = 8;  // Arduino 1 超声波传感器的回声引脚
+const int vibOutPin1 = 2; // Arduino 1 振动马达引脚
+
+// MPU6050 Variables
+MPU6050 mpu;
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
+
+// Vibration control variables
+bool stopVibration = false; // Variable to track whether the vibration should stop
+bool isAccelerating = false; // To track if acceleration starts
+bool isDecelerating = false; // To track if deceleration starts
+unsigned long vibrationDuration = 1000; // Duration to keep the vibration on in milliseconds
+unsigned long vibrationStartTime; // To track when to start the vibration
+bool vibrationActive = false; // To check if vibration is currently active
+
+// Acceleration detection flag
+bool checkAcceleration = false; // Flag to enable or disable acceleration check
+bool vibrationStoppedByUser = false; // Flag to track if the user stopped the vibration
+
+void setup() {
+  Serial.begin(9600); // Initialize serial communication
+
+  // Initialize Ultrasonic Sensor
+  pinMode(trigPin1, OUTPUT); // Set trigger pin as output
+  pinMode(echoPin1, INPUT); // Set echo pin as input
+  pinMode(vibOutPin1, OUTPUT); // Set vibration motor pin as output
+
+  // Initialize MPU6050
+  Wire.begin();
+  mpu.initialize();
+  if (!mpu.testConnection()) {
+    Serial.println("MPU6050 initialization failed!");
+    while (1); // Stop execution if initialization fails
+  }
+}
+
+void loop() {
+  long duration, cm;
+
+  // Trigger the ultrasonic sensor
+  digitalWrite(trigPin1, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin1, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin1, LOW);
+
+  // Read the signal from the sensor
+  duration = pulseIn(echoPin1, HIGH);
+  cm = microsecondsToCentimeters(duration);
+
+  // Print the distance to the Serial Monitor
+  Serial.print("Distance 1: ");
+  Serial.print(cm);
+  Serial.println(" cm");
+
+  // Control the vibration motor based on the measured distance
+  if (cm <= 5) {
+    stopVibration = false; // Allow vibration to occur again if distance <= 5 cm
+    digitalWrite(vibOutPin1, HIGH); // Activate the vibration motor if distance <= 5 cm
+  } else {
+    digitalWrite(vibOutPin1, LOW); // Deactivate the vibration motor
+  }
+
+  // Check if acceleration detection is enabled
+  if (checkAcceleration && !vibrationStoppedByUser) {
+    // Read MPU6050 Data
+    mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+  
+    // Print accelerometer data
+    Serial.print("Accel X: "); Serial.print(ax);
+    Serial.print("  Accel Y: "); Serial.print(ay);
+    Serial.print("  Accel Z: "); Serial.println(az);
+
+    // Check conditions for acceleration and deceleration
+    if (!isAccelerating && ax < -100) {
+      isAccelerating = true; // Start acceleration condition
+      Serial.println("Acceleration started.");
+    }
+
+    if (isAccelerating && ax > 12000) {
+      isDecelerating = true; // Start deceleration condition
+      Serial.println("Deceleration started.");
+    }
+
+    if (isDecelerating && ax < -100) {
+      digitalWrite(vibOutPin1, HIGH); // Activate vibration motor
+      vibrationStartTime = millis(); // Store the time when vibration starts
+      vibrationActive = true; // Set vibration active flag
+      Serial.println("Vibration motor activated.");
+    }
+
+    // Manage vibration duration
+    if (vibrationActive && (millis() - vibrationStartTime >= vibrationDuration)) {
+      digitalWrite(vibOutPin1, LOW); // Deactivate vibration motor
+      vibrationActive = false; // Reset vibration active flag
+      isAccelerating = false; // Reset acceleration status
+      isDecelerating = false; // Reset deceleration status
+      Serial.println("Vibration motor deactivated.");
+    }
+  }
+
+  // Check for serial input to control features
+  if (Serial.available() > 0) {
+    char inputChar = Serial.read();
+    if (inputChar == 'K') {
+      stopVibration = true; // Stop the vibration when 'K' is pressed
+      vibrationStoppedByUser = true; // Set flag to indicate user has stopped the vibration
+      digitalWrite(vibOutPin1, LOW); // Ensure vibration motor is off
+      Serial.println("Vibration manually stopped by user.");
+    }
+    if (inputChar == 'A') {
+      checkAcceleration = true; // Enable acceleration detection when 'A' is pressed
+      isAccelerating = false;  // Reset acceleration flag
+      isDecelerating = false;  // Reset deceleration flag
+      vibrationActive = false; // Ensure vibration isn't active yet
+      stopVibration = false;   // Allow vibration to occur again
+      vibrationStoppedByUser = false; // Reset the user stop flag when acceleration is re-enabled
+      Serial.println("Acceleration detection enabled and conditions reset.");
+    }
+  }
+
+  delay(100); // Short delay before the next loop
+}
+
+// Function to convert microseconds to centimeters
+long microsecondsToCentimeters(long microseconds) {
+  return microseconds / 29 / 2; // Convert to centimeters
+}
