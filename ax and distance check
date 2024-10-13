@@ -5,7 +5,7 @@
 // Ultrasonic Sensor Pins
 const int trigPin1 = 7;  // Trigger pin for Ultrasonic Sensor
 const int echoPin1 = 8;  // Echo pin for Ultrasonic Sensor
-const int vibOutPin1 = 2; // Vibration motor pin
+const int vibOutPin1 = 6; // Vibration motor pin
 
 // MPU6050 Variables
 MPU6050 mpu;
