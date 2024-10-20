@@ -1,6 +1,6 @@
-#include "Wire.h"       
-#include "I2Cdev.h"     
-#include "MPU6050.h"    
+#include "Wire.h"
+#include "I2Cdev.h"
+#include "MPU6050.h"
 
 // Ultrasonic Sensor Pins
 const int trigPin1 = 7;  // Trigger pin for Ultrasonic Sensor
@@ -20,9 +20,17 @@ unsigned long vibrationDuration = 1000; // Duration for vibration in millisecond
 unsigned long vibrationStartTime; // Track when to start the vibration
 bool vibrationActive = false; // Check if vibration is currently active
 
+// Silence detection variables
+unsigned long silenceStartTime = 0;  // Record silence start time
+bool silenceStarted = false;         // Track if silence period has started
+unsigned long silenceDurationThreshold = 120000; // Silence threshold of 2 minutes (in milliseconds)
+
 // Acceleration detection flags
 bool checkAcceleration = false; // Enable or disable acceleration check
 bool vibrationStoppedByUser = false; // Track if the user stopped the vibration
+
+// Sound sensor pin
+const int soundPin = A0; // 假设声音传感器连接到A0
 
 void setup() {
   Serial.begin(9600); // Initialize serial communication
@@ -43,6 +51,11 @@ void setup() {
 
 void loop() {
   long duration, cm;
+  int soundValue = analogRead(soundPin); // 读取声音传感器
+
+  // 打印声音传感器的数值
+  Serial.print("Sound value: ");
+  Serial.println(soundValue);
 
   // Trigger the ultrasonic sensor
   digitalWrite(trigPin1, LOW);
@@ -68,6 +81,29 @@ void loop() {
     digitalWrite(vibOutPin1, LOW); // Deactivate the vibration motor
   }
 
+  // Silence detection logic
+  if (soundValue == 0 && !silenceStarted) {
+    silenceStartTime = millis(); // 记录沉默开始的时间
+    silenceStarted = true;
+  } else if (soundValue > 0) {
+    silenceStarted = false; // 如果有声音，重置沉默计时
+  }
+
+  if (silenceStarted && (millis() - silenceStartTime >= silenceDurationThreshold) && !stopVibration) {
+    digitalWrite(vibOutPin1, HIGH); // 激活震动马达
+    vibrationStartTime = millis(); // 记录震动开始的时间
+    vibrationActive = true;
+    silenceStarted = false; // 重置沉默状态
+    Serial.println("Vibration activated after 2 minutes of silence.");
+  }
+
+  // Manage vibration duration
+  if (vibrationActive && (millis() - vibrationStartTime >= vibrationDuration)) {
+    digitalWrite(vibOutPin1, LOW); // 停止震动
+    vibrationActive = false;
+    Serial.println("Vibration motor deactivated.");
+  }
+
   // Check if acceleration detection is enabled
   if (checkAcceleration && !vibrationStoppedByUser) {
     // Read MPU6050 Data
@@ -79,7 +115,7 @@ void loop() {
     Serial.print("  Accel Z: "); Serial.println(az);
 
     // Check conditions for acceleration and deceleration
-    if (!isAccelerating && ax < -100 && cm < 1200) {
+    if (!isAccelerating && ax < 10000 && cm < 1200) {
       isAccelerating = true; // Start acceleration condition
       Serial.println("Acceleration started.");
     }
@@ -89,7 +125,7 @@ void loop() {
       Serial.println("Deceleration started.");
     }
 
-    if (isDecelerating && ax < -100 && cm < 1200) {
+    if (isDecelerating && ax < 10000 && cm < 1200) {
       digitalWrite(vibOutPin1, HIGH); // Activate vibration motor
       vibrationStartTime = millis(); // Store the time when vibration starts
       vibrationActive = true; // Set vibration active flag
@@ -133,4 +169,3 @@ void loop() {
 long microsecondsToCentimeters(long microseconds) {
   return microseconds / 29 / 2; // Convert to centimeters
 }
-
