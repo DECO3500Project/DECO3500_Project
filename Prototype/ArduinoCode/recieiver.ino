@@ -21,7 +21,7 @@ bool checkAcceleration = false; // Enable or disable acceleration check
 bool vibrationStoppedByUser = false; // Track if the user stopped the vibration
 
 // Sound sensor pin
-const int soundPin = A0; // 假设声音传感器连接到A0
+const int soundPin = A0; 
 
 void setup() {
   Serial.begin(9600); // Initialize serial communication
@@ -34,7 +34,7 @@ void setup() {
 
 void loop() {
   long duration, cm;
-  int soundValue = analogRead(soundPin); // 读取声音传感器
+  int soundValue = analogRead(soundPin); 
 
   // 打印声音传感器的数值
   Serial.print("Sound value: ");
@@ -66,24 +66,24 @@ void loop() {
 
   // Silence detection logic
   if (soundValue == 20 && !silenceStarted) {
-    silenceStartTime = millis(); // 记录沉默开始的时间
+    silenceStartTime = millis(); 
     silenceStarted = true;
     Serial.println("Silence start");
   } else if (soundValue > 20) {
-    silenceStarted = false; // 如果有声音，重置沉默计时
+    silenceStarted = false; 
   }
 
   if (silenceStarted && (millis() - silenceStartTime >= silenceDurationThreshold) && !stopVibration) {
-    digitalWrite(vibOutPin1, HIGH); // 激活震动马达
-    vibrationStartTime = millis(); // 记录震动开始的时间
+    digitalWrite(vibOutPin1, HIGH);
+    vibrationStartTime = millis(); 
     vibrationActive = true;
-    silenceStarted = false; // 重置沉默状态
+    silenceStarted = false; 
     Serial.println("Vibration activated after 2 minutes of silence.");
   }
 
   // Manage vibration duration
   if (vibrationActive && (millis() - vibrationStartTime >= vibrationDuration)) {
-    digitalWrite(vibOutPin1, LOW); // 停止震动
+    digitalWrite(vibOutPin1, LOW);
     vibrationActive = false;
     Serial.println("Vibration motor deactivated.");
   }
