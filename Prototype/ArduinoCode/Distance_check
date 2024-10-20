@@ -6,7 +6,7 @@ long duration, cm;
 bool vibrationActive = false;
 
 void setup() {
-  Serial.begin(9600); // 初始化串口通信
+  Serial.begin(9600); 
   pinMode(trigPin2, OUTPUT);
   pinMode(echoPin2, INPUT);
   pinMode(vibOutPin2, OUTPUT);
@@ -27,10 +27,10 @@ void loop() {
 
 
     if (distance1 <= 5 && distance2 <= 5) {
-      digitalWrite(vibOutPin2, HIGH); // 震动马达启动
+      digitalWrite(vibOutPin2, HIGH); 
       vibrationActive = true;
     } else {
-      digitalWrite(vibOutPin2, LOW); // 震动马达关闭
+      digitalWrite(vibOutPin2, LOW); 
       vibrationActive = false;
     }
   }
