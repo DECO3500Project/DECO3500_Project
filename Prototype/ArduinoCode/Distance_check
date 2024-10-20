@@ -13,19 +13,19 @@ void setup() {
 }
 
 void loop() {
-  // 读取自己的超声波传感器距离
+
   long distance2 = readDistance(trigPin2, echoPin2);
   
-  // 发送距离到另一块Arduino
+ 
   Serial.print(distance2);
   Serial.println();
 
-  // 接收另一块Arduino传来的距离
+
   if (Serial.available() > 0) {
     String receivedData = Serial.readStringUntil('\n');
     long distance1 = receivedData.toInt();
 
-    // 判断两块板子的距离是否都小于5厘米
+
     if (distance1 <= 5 && distance2 <= 5) {
       digitalWrite(vibOutPin2, HIGH); // 震动马达启动
       vibrationActive = true;
@@ -35,7 +35,7 @@ void loop() {
     }
   }
 
-  delay(100); // 等待下一个循环
+  delay(100); 
 }
 
 long readDistance(int trigPin, int echoPin) {
