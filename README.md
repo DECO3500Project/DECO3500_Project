@@ -1,5 +1,7 @@
 # TeamProject: Shall we cook?
 
+Shall We Cook is a system designed for international students in shared kitchens. Using shared projection and wrist devices, users engage in real-time, interactive, gamified tasks, fostering social bonds while learning about cultural and family cooking traditions in a relaxed atmosphere.
+
 # Content Structure
 We have two sections under the project: the first one is the prototype, and the second is the images.
 
