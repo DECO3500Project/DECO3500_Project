@@ -7,7 +7,10 @@ We have two sections under the project: the first one is the prototype, and the 
 
 * For the images, we have separated them into four stages. All the work details from our Miro Board was downlarded as image, all these materials are documented in the timeline order.
 
-# Function
+# Wiki Page
+On the wiki page, we have a summary of each design stage (stand-up in weeks 8 and 10, trade show in week 12), it also demonstrate the key outcome of each stage and our action based on the tutor and users feedback. 
+
+Also, an overview of the design process and ethical considerations.
 
 # Guidelines for use
 **Please refer to [prototype video](https://youtu.be/z_AU-Dssteg?si=0W-s1Vil3uGfOGYu) to see how our prototype works.**
