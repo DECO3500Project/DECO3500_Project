@@ -40,9 +40,6 @@ Silence Detection for Pop-up Chat Topics: The sound sensor continuously monitors
 ### NFC for object recognition ###
 NFC technology is used to detect interactions between the user's wrist device and kitchen tools or condiments. Due to the high cost of the equipment (NFC detection module for Arduino is too expensive), we used a smartphone to simulate the wrist device’s display. When the wrist device approaches a designated utensil, the smartphone screen automatically switches to the confirmation interface for that utensil. Moreover, when the user is seasoning the dish, the wrist device will display corresponding prompts based on the pre-set food preferences, reminding the user of key seasoning considerations. 
 
-![NFC Shortcut](https://github.com/DECO3500Project/DECO3500_Project/blob/main/image/3-Tradeshow/Shortcuts.jpg)
-![NFC tools](https://github.com/DECO3500Project/DECO3500_Project/blob/main/image/3-Tradeshow/NFC%20tools.jpg)
-
 # Contact Us
 Contact Us
 If you have any questions or suggestions, you can reach us by email at lony98.a@gmail.com
